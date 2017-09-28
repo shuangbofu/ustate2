@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ustate.dao.StatementDao">
+<resultMap id="statementResultMap" type="cn.ustate.entity.Statement">
+	<id column="id" property="id" jdbcType="INTEGER"/>
+	<result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="sercret" property="sercret" jdbcType="BIT" />
+    <result column="comment_count" property="commentCount" jdbcType="BIT"/>
+    <result column="like_count" property="likeCount" jdbcType="BIT"/>
+    <result column="liked" property="liked" jdbcType="BIT"/>
+    <association property="profile" javaType="cn.ustate.entity.Profile">
+    	<id column="profId" property="id" jdbcType="INTEGER" />
+	    <result column="nickname" property="nickname" jdbcType="VARCHAR" />
+	    <result column="avatar" property="avatar" jdbcType="VARCHAR" />
+	    <result column="gender" property="gender" jdbcType="BIT" />
+    </association>
+</resultMap>
+	<select id="getCount" resultType="int">
+		select count(*) from `statement`
+	</select>
+	<select id="list" resultMap="statementResultMap">
+		select stmt.id, stmt.content, stmt.create_time, stmt.sercret, comment_count, like_count, 
+		profile.id profId, profile.avatar, profile.gender, profile.nickname
+		<if test="profId!=0">
+			, liked
+		</if>
+		from (select * from `statement`
+		<if test="fromId!=0">
+			where id &lt; #{fromId}
+		</if> ) as stmt
+		<if test="profId!=0">
+			left join (
+				select count(id) as liked, parent_id
+				from `like`
+				where prof_id = #{profId}
+				and type = 1
+				group by id
+			) as likedTable
+			on parent_id = stmt.id
+		</if>		
+		left join `profile` on profile.id = stmt.prof_id
+		<choose>
+			<when test="listType == 1">
+				where like_count >= 10 or comment_count > 10
+			</when>
+			<when test="listType == 2">
+				where stmt.prof_id = #{profId}
+			</when>
+			<when test="listType == 3">
+				where stmt.id in (select parent_id from `like` where prof_id = #{profId} and type = 1)
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+		group by stmt.id
+		order by create_time desc, stmt.id desc
+		limit 0, 15
+	</select>
+	
+	<select id="getDetail" resultMap="statementResultMap">
+		select stmt.id, stmt.content, stmt.create_time, stmt.sercret, comment_count, like_count,
+		profile.id profId, profile.avatar, profile.gender, profile.nickname
+		<if test="profId!=0">
+			,liked
+		</if>
+		from (select * from `statement` where id = #{id}) as stmt
+		<if test="profId!=0">
+			left join (
+				select 1 as liked
+				from `like`
+				where prof_id = #{profId}
+				and parent_id = #{id}
+				and type = 1
+			) as likedTable
+			on 1 = 1
+		</if>
+		left join `profile` on profile.id = stmt.prof_id
+	</select>
+	
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id">
+		insert into `statement` (content, create_time, prof_id, sercret)
+		values (#{content}, #{createTime}, #{profile.id}, #{sercret})
+	</insert>
+	
+	<delete id="delete">
+		delete from `statement` where prof_id = #{profId} and id = #{id}
+	</delete>
+	
+	<select id="getProfId" parameterType="int" resultType="int">
+		select prof_id from `statement` where id = #{id}
+	</select>
+	<select id="getContent" parameterType="int" resultType="String">
+		select content from `statement` where id = #{id}
+	</select>
+	
+	<update id="updateCommentCount">
+		update `statement` set comment_count = comment_count + #{value} where id = #{id}
+	</update>
+	<update id="updateLikeCount">
+		update `statement` set like_count = like_count + #{value} where id = #{id}
+	</update>
+	
+	<select id="getCountByProfId" parameterType="int" resultType="int">
+		select count(*) from `statement` where prof_id = #{profId}
+	</select>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ustate.dao.LikeDao">
+<resultMap type="cn.ustate.entity.Like" id="likeResultMap">
+	<id column="id" property="id" jdbcType="INTEGER"/>
+	<result column="prof_id" property="profId" jdbcType="INTEGER"/>
+	<result column="parent_id" property="parentId" jdbcType="INTEGER"/>
+	<result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+	<result column="type" property="type" jdbcType="BIT"/>
+</resultMap>
+	<delete id="delete">
+		delete from `like`
+		where type = #{type} 
+		and prof_id = #{profId}
+		and parent_id = #{parentId}
+	</delete>
+	
+	<insert id="insert" parameterType="cn.ustate.entity.Like" useGeneratedKeys="true" keyProperty="id">
+		insert into `like`(prof_id, parent_id, create_time, type)
+		select #{profId}, #{parentId}, #{createTime}, #{type}
+		from DUAL
+		where not exists
+		(select 1 from `like`
+			where prof_id = #{profId}
+			and parent_id = #{parentId}
+			and type = #{type}
+		)
+	</insert>
+	
+	 <select id="getCountByProfId" parameterType="int" resultType="int">
+	  	select count(*) from `like` where prof_id = #{profId} and type = 1
+	  </select>
+</mapper>

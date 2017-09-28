@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ustate.dao.NoticeDao">
+	<insert id="insert">
+		insert into `notice`(def_prof_id, prof_id, action, origin_content, content, root_id, parent_id, create_time)
+		select #{defProfId}, #{profId}, #{action}, #{originContent}, #{content}, #{rootId}, #{parentId}, #{createTime}
+		from DUAL
+		where not exists
+		(select 1 from notice 
+			where prof_id = #{profId}
+			and def_prof_id = #{defProfId}
+			and root_id = #{rootId}
+			and parent_id = #{parentId}
+			and action = #{action}
+		)
+	</insert>
+	
+	<select id="list" resultType="cn.ustate.entity.Notice">
+		select id, def_prof_id, action, origin_content, content, root_id, parent_id, create_time, status
+		from `notice`
+		<!-- where status = 1 -->
+		where def_prof_id = #{profId}
+		<if test="fromId!=0">
+			and id &lt; #{fromId}
+		</if>
+		order by create_time desc, id desc
+		limit 0, 15
+	</select>
+	
+	 <select id="getCountByProfId" parameterType="int" resultType="int">
+  	select count(*) from `notice` where def_prof_id = #{profId}
+  </select>
+  <select id="getEffectiveCount" parameterType="int" resultType="int">
+  	select count(*) from `notice` where def_prof_id = #{profId} and status = 1
+  </select>
+  
+  <update id="resetStatus" parameterType="int">
+  	update `notice` set status = 0 where def_prof_id = #{profId}
+  </update>
+</mapper>

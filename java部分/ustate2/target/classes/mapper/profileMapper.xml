@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ustate.dao.ProfileDao">
+<resultMap id="profileResultMap" type="cn.ustate.entity.Profile">
+	<id column="id" property="id" jdbcType="INTEGER" />
+    <result column="nickname" property="nickname" jdbcType="VARCHAR" />
+    <result column="avatar" property="avatar" jdbcType="VARCHAR" />
+    <result column="gender" property="gender" jdbcType="BIT" />
+</resultMap>
+	<select id="getProfile" parameterType="int" resultMap="profileResultMap">
+		select * from `profile` where id = #{id}
+	</select>
+<!-- 	<select id="getNickname" parameterType="int" resultType="String">
+		select nickname from `profile` where id = #{id}
+	</select> -->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="id">
+		insert into `profile` (id, nickname, gender, avatar)
+		values (#{id}, #{nickname}, #{gender}, #{avatar})
+	</insert>
+	
+	<update id="update" parameterType="cn.ustate.entity.Profile">
+		update `profile` set nickname=#{nickname}, gender=#{gender}, avatar=#{avatar}
+		where id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ustate.dao.CommentDao">
+  <resultMap id="commentResultMap" type="cn.ustate.entity.Comment" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="root_id" property="rootId" jdbcType="INTEGER" />
+    <result column="parent_id" property="parentId" jdbcType="INTEGER"/>
+    <result column="like_count" property="likeCount" jdbcType="BIT"/>
+    <result column="liked" property="liked" jdbcType="BIT"/>
+    
+     <association property="profile" javaType="cn.ustate.entity.Profile">
+    	<id column="profId" property="id" jdbcType="INTEGER" />
+	    <result column="nickname" property="nickname" jdbcType="VARCHAR" />
+	    <result column="avatar" property="avatar" jdbcType="VARCHAR" />
+	    <result column="gender" property="gender" jdbcType="BIT" />
+    </association>
+  </resultMap>
+	<select id="getCount" resultType="int">
+		select count(*) from comment
+	</select>
+	
+	<select id="list" resultMap="commentResultMap">
+  	select cmt.id, cmt.content, cmt.create_time, cmt.root_id, cmt.parent_id, cmt.like_count, 
+	profile.id profId, profile.avatar, profile.gender, profile.nickname
+	<if test="profId!=0">
+	, liked
+	</if>
+	from (select * from comment where root_id = #{rootId}) as cmt
+	<if test="profId!=0">
+		left join(
+			select count(id) as liked, parent_id
+			from `like`
+			where prof_id = #{profId}
+			and type = 3
+			group by id
+		) as likedTable
+		on likedTable.parent_id = cmt.id
+	</if>
+	left join `profile` on profile.id = cmt.prof_id
+	order by cmt.create_time, cmt.id
+  </select>
+  
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+  	insert into `comment`(content, prof_id, create_time, root_id, parent_id) 
+  	values (#{content}, #{profile.id}, #{createTime}, #{rootId}, #{parentId})
+  </insert>
+  
+  <select id="getProfId" parameterType="int" resultType="int">
+  	select prof_id from `comment` where id = #{id}
+  </select>
+  <select id="getContent" parameterType="int" resultType="String">
+  	select content from `comment` where id = #{id}
+  </select>
+  <update id="updateLikeCount">
+  	update `comment` set like_count = like_count + #{value} where id = #{id}
+  </update>
+  <select id="getRootId" resultType="int" parameterType="int">
+  	select root_id from `comment` where id = #{id}
+  </select>
+<!--   <select id="getParentId" resultType="int" parameterType="int">
+  	select parent_id from `comment` where id = #{id}
+  </select>
+  <select id="getCountByProfId" parameterType="int" resultType="int">
+  	select count(*) from `comment` where prof_id = #{profId}
+  </select> -->
+  <delete id="delete">
+  	delete from `comment` where prof_id = #{profId} and id = #{id}
+  </delete>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ustate.dao.UserDao">
+	<select id="getCount" resultType="int">
+		select count(*) from `user`
+	</select>
+	<select id="login" parameterType="cn.ustate.entity.User" resultType="cn.ustate.entity.User">
+		select prof_id from `user` where name = #{name} and password = #{password}
+	</select>
+	
+	<insert id="insert">
+		insert into `user` (uid, prof_id, create_time, update_time, status )
+		values(#{uId}, #{profId}, #{createTime}, #{updateTime}, 1)
+	</insert>
+	<update id="updateTime" parameterType="cn.ustate.entity.User">
+		update `user` set update_time = #{updateTime} where uid = #{uId}
+	</update>
+	
+	<select id="getUser" resultType="cn.ustate.entity.User" parameterType="String">
+		select * from `user` where uid = #{uId}
+	</select>
+</mapper>
