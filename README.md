@@ -18,7 +18,15 @@ ustate校园匿名社区2.0（重写了vue和后台api以及数据库，重写�
   我的评论查看  
   searchCard校园卡  
   ...  
-![Image](https://github.com/shuangbofu/ustate2/blob/master/preview/index2.png)  
-![Image](https://github.com/shuangbofu/ustate2/blob/master/preview/detail2.png)  
-![Image](https://github.com/shuangbofu/ustate2/blob/master/preview/publish2.png)  
-![Image](https://github.com/shuangbofu/ustate2/blob/master/preview/profile2.png)  
+## 效果图：
+### index页面
+![Image](https://github.com/shuangbofu/ustate2/blob/master/preview/index2.png)  
+### detail页面
+![Image](https://github.com/shuangbofu/ustate2/blob/master/preview/detail2.png)  
+### publish页面
+![Image](https://github.com/shuangbofu/ustate2/blob/master/preview/publish2.png) 
+### profile页面
+![Image](https://github.com/shuangbofu/ustate2/blob/master/preview/profile2.png)  
+
+## 链接
+[www.ustate.cn/ustate2/index](http://www.ustate.cn/ustate2/index)
